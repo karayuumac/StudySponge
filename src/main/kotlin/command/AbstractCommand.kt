@@ -13,16 +13,16 @@ import org.spongepowered.api.command.spec.CommandSpec
 /**
  * Commandを抽象化したクラス。
  */
-abstract class AbstractCommand : CommandExecutor {
+abstract class AbstractCommand : ExcutableCommandImpl {
     /**
      * コマンドを実行するためのAlias(/の後の文字列)を取得します。
      */
-    abstract fun getAlias(): List<String>
+    abstract override fun getAlias(): List<String>
 
     /**
      * コマンドの仕様を決定する[CommandSpec]を取得します。
      */
-    abstract fun getCommandSpec() : CommandSpec
+    abstract override fun getCommandSpec() : CommandSpec
 
     /**
      * コマンドの動作を取得します。
