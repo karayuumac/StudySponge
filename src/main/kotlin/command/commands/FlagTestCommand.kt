@@ -18,16 +18,18 @@ class FlagTestCommand : AbstractCommand() {
 
     override fun getCommandSpec(): CommandSpec {
         return CommandSpec.builder()
-                .arguments(GenericArguments.flags().flag("hi")
+                .arguments(GenericArguments.flags().flag("h")
                         .buildWith(GenericArguments.bool(Text.of("isDebugMode"))))
                 .executor(this)
                 .build()
     }
 
     override fun execute(src: CommandSource?, args: CommandContext?): CommandResult {
-        if (args?.hasAny("isDebugMode") == true) {
-            src?.sendMessage(Text.of("-hiフラグisDebugModeを" +
-                    "${args.getOne<Boolean>("isDebugMode")}に変更しました"))
+        if (args?.hasAny("h") == true) {
+            src?.sendMessage(Text.of("-hフラグisDebugModeを" +
+                    "${args.getOne<Boolean>("isDebugMode").get()}に変更しました"))
+        } else {
+            src?.sendMessage(Text.of("-hフラグは含まれていませんね。"))
         }
         return CommandResult.success()
     }
