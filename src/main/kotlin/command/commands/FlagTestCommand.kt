@@ -26,8 +26,8 @@ class FlagTestCommand : AbstractCommand() {
 
     override fun execute(src: CommandSource?, args: CommandContext?): CommandResult {
         if (args?.hasAny("h") == true) {
-            src?.sendMessage(Text.of("-hフラグisDebugModeを" +
-                    "${args.getOne<Boolean>("isDebugMode").get()}に変更しました"))
+            src?.sendMessage(Text.of("-hフラグisDebugModeを".plus(
+                    "${args.getOne<Boolean>("isDebugMode").get()}に変更しました")))
         } else {
             src?.sendMessage(Text.of("-hフラグは含まれていませんね。"))
         }

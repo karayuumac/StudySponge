@@ -2,15 +2,23 @@ import com.google.inject.Inject
 import command.AbstractCommand
 import command.commands.FlagTestCommand
 import command.commands.TestCommand
+import data.BlockPlaceAmountData
+import data.BlockPlaceAmountDataBuilder
+import data.ImmutableBlockPlaceAmountData
 import listener.PlayerBlockBreakListener
 import ninja.leaping.configurate.commented.CommentedConfigurationNode
 import ninja.leaping.configurate.loader.ConfigurationLoader
 import org.slf4j.Logger
 import org.spongepowered.api.Sponge
 import org.spongepowered.api.config.DefaultConfig
+import org.spongepowered.api.data.DataRegistration
+import org.spongepowered.api.entity.living.player.Player
 import org.spongepowered.api.event.Listener
+import org.spongepowered.api.event.Order
+import org.spongepowered.api.event.block.ChangeBlockEvent
 import org.spongepowered.api.event.game.state.*
 import org.spongepowered.api.plugin.Plugin
+import org.spongepowered.api.plugin.PluginContainer
 import java.io.IOException
 import java.nio.file.Path
 
@@ -19,7 +27,7 @@ import java.nio.file.Path
  */
 
 @Plugin(
-        id = "studysponge",
+        id = StudySponge.ID,
         name = "StudySponge",
         version = "1.0.0"
 )
@@ -43,11 +51,16 @@ class StudySponge {
     @Inject
     private lateinit var logger: Logger
 
+    @Inject
+    lateinit var container: PluginContainer
+
     companion object {
         /** ゲームの設定 */
         lateinit var gameConf: GameConfig
 
         lateinit var logger: Logger
+
+        const val ID = "studysponge"
     }
 
     @Listener
@@ -73,6 +86,35 @@ class StudySponge {
     fun onInitialization(event: GameInitializationEvent) {
         //ここでlistenerの登録
         Sponge.getEventManager().registerListeners(this, PlayerBlockBreakListener())
+
+        //DataManager
+        val dataManager = Sponge.getDataManager()
+
+        dataManager.registerContentUpdater(BlockPlaceAmountData::class.java, BlockPlaceAmountDataBuilder.ContentUpdater)
+
+        DataRegistration.builder()
+                .dataClass(BlockPlaceAmountData::class.java)
+                .immutableClass(ImmutableBlockPlaceAmountData::class.java)
+                .builder(BlockPlaceAmountDataBuilder)
+                .manipulatorId("{place-amount|")
+                .dataName("Place")
+                .buildAndRegister(container)
+    }
+
+    @Listener(order = Order.POST)
+    fun onBlockPlace(event: ChangeBlockEvent.Place) {
+        val causePlayer = event.cause.mapNotNull { it as? Player }.firstOrNull() ?: return
+
+        val placeBlockAmount = event.transactions
+                .filter { it.isValid }
+                .size
+
+        causePlayer.getOrCreate(BlockPlaceAmountData::class.java)
+                .map { it + placeBlockAmount }
+                .ifPresent {
+                    causePlayer.offer(it)
+                    println(it.amount)
+                }
     }
 
     @Listener

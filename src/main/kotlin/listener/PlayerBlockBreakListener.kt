@@ -11,7 +11,8 @@ import org.spongepowered.api.text.Text
 class PlayerBlockBreakListener {
     @Listener
     fun onPlayerBlockBreak(event: ChangeBlockEvent.Break) {
-        val player = event.cause.last(Player::class.java).get()
+        val player = event.cause.mapNotNull { it as? Player }.firstOrNull() ?: return
+
 
         player.sendMessage(Text.of("ブロック破壊イベント発生"))
         player.sendMessage(Text.of("${event.transactions}"))
