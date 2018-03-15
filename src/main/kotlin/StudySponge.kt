@@ -6,6 +6,7 @@ import data.BlockPlaceAmountData
 import data.BlockPlaceAmountDataBuilder
 import data.ImmutableBlockPlaceAmountData
 import listener.PlayerBlockBreakListener
+import listener.PlayerBlockClickListener
 import ninja.leaping.configurate.commented.CommentedConfigurationNode
 import ninja.leaping.configurate.loader.ConfigurationLoader
 import org.slf4j.Logger
@@ -86,6 +87,7 @@ class StudySponge {
     fun onInitialization(event: GameInitializationEvent) {
         //ここでlistenerの登録
         Sponge.getEventManager().registerListeners(this, PlayerBlockBreakListener())
+        Sponge.getEventManager().registerListeners(this, PlayerBlockClickListener())
 
         //DataManager
         val dataManager = Sponge.getDataManager()
