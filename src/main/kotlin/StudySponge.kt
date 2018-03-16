@@ -17,9 +17,14 @@ import org.spongepowered.api.entity.living.player.Player
 import org.spongepowered.api.event.Listener
 import org.spongepowered.api.event.Order
 import org.spongepowered.api.event.block.ChangeBlockEvent
+import org.spongepowered.api.event.cause.EventContextKeys
 import org.spongepowered.api.event.game.state.*
 import org.spongepowered.api.plugin.Plugin
 import org.spongepowered.api.plugin.PluginContainer
+import org.spongepowered.api.text.Text
+import re.tutorial.ImmutableMappedData
+import re.tutorial.MappedData
+import re.tutorial.MappedDataBuilder
 import java.io.IOException
 import java.nio.file.Path
 
@@ -95,11 +100,19 @@ class StudySponge {
         dataManager.registerContentUpdater(BlockPlaceAmountData::class.java, BlockPlaceAmountDataBuilder.ContentUpdater)
 
         DataRegistration.builder()
-                .dataClass(BlockPlaceAmountData::class.java)
-                .immutableClass(ImmutableBlockPlaceAmountData::class.java)
-                .builder(BlockPlaceAmountDataBuilder)
-                .manipulatorId("{place-amount|")
+                .dataClass(/* 普通のDataクラス */BlockPlaceAmountData::class.java)
+                .immutableClass(/* ImmutableDataクラス */ImmutableBlockPlaceAmountData::class.java)
+                .builder(/* DataBuilder */BlockPlaceAmountDataBuilder)
+                .manipulatorId(/* id。形式は({manipulator-id|)を標準とする。 */"{place-amount|")
                 .dataName("Place")
+                .buildAndRegister(container)
+
+        DataRegistration.builder()
+                .dataClass(MappedData::class.java)
+                .immutableClass(ImmutableMappedData::class.java)
+                .builder(MappedDataBuilder)
+                .manipulatorId("{mapped-data|")
+                .dataName("AllBlockPlace")
                 .buildAndRegister(container)
     }
 
@@ -117,6 +130,23 @@ class StudySponge {
                     causePlayer.offer(it)
                     println(it.amount)
                 }
+    }
+
+    @Listener(order = Order.POST)
+    fun playerBlockPlaceLogger(event: ChangeBlockEvent.Place) {
+        val causePlayer = event.cause.mapNotNull { it as? Player }.firstOrNull() ?: return
+
+        val placedBlockType = event.context.get(EventContextKeys.USED_ITEM).let {
+            if (it.isPresent) it.get() else return
+        }.type
+
+        val placeAmount = event.transactions
+                .filter { it.isValid }
+                .size
+
+        causePlayer.getOrCreate(MappedData::class.java).get().map.put(placedBlockType.block.get(), placeAmount)
+
+        logger.info("ブロックタイプ[$placedBlockType],量[${causePlayer.getOrCreate(MappedData::class.java).get().get(placedBlockType.block.get())}]")
     }
 
     @Listener
