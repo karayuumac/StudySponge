@@ -18,25 +18,47 @@ class BlockPlaceAmountData(val amount: Int) :
 
     constructor(): this(0)
 
-    operator fun plus(amount: Int): BlockPlaceAmountData = BlockPlaceAmountData(super.getValue() + amount)
-
-    override fun from(container: DataContainer): Optional<BlockPlaceAmountData> =
-            container.getObject(KeyRepository.placeAmount.query, Int::class.java).map { setValue(it) }
-
-    override fun copy(): BlockPlaceAmountData = BlockPlaceAmountData(amount)
-
-    override fun getContentVersion(): Int = BlockPlaceAmountDataBuilder.contentVersion
-
-    override fun fill(dataHolder: DataHolder, overlap: MergeFunction): Optional<BlockPlaceAmountData> {
-        val merged = overlap.merge(this, dataHolder.get(BlockPlaceAmountData::class.java).orElse(null))
-
-        return setValue(merged.value).let { Optional.of(it) }
+    operator fun plus(amount: Int): BlockPlaceAmountData {
+        println("呼び出し。引数[amount = $amount]")
+        return BlockPlaceAmountData(super.getValue() + amount).also { println("返り値[$it]") }
     }
 
-    override fun asImmutable(): ImmutableBlockPlaceAmountData = ImmutableBlockPlaceAmountData(amount)
+    override fun from(container: DataContainer): Optional<BlockPlaceAmountData> {
+        println("呼び出し。引数[container = $container]")
+        return container.getObject(KeyRepository.placeAmount.query, Int::class.java).map { setValue(it) }.also { println("返り値[$it]") }
+    }
 
-    override fun getValueGetter(): Value<*> = Sponge.getRegistry().valueFactory.
-            createValue(KeyRepository.placeAmount, amount)
+    override fun copy(): BlockPlaceAmountData {
+        println("呼び出し。")
+        return BlockPlaceAmountData(amount).also { println("返り値[$it]") }
+    }
 
-    override fun toContainer(): DataContainer = super.toContainer().set(KeyRepository.placeAmount, amount)
+    override fun getContentVersion(): Int {
+        println("呼び出し。")
+        return BlockPlaceAmountDataBuilder.contentVersion.also { println("返り値[$it]") }
+    }
+
+    override fun fill(dataHolder: DataHolder, overlap: MergeFunction): Optional<BlockPlaceAmountData> {
+        println("呼び出し。引数[dataHolder = $dataHolder], [overlap = $overlap]")
+        val merged = overlap.merge(this, dataHolder.get(BlockPlaceAmountData::class.java).orElse(null)).also { println("merged = $it") }
+
+        return setValue(merged.value).let { Optional.of(it) }.also { println("返り値[$it]") }
+    }
+
+    override fun asImmutable(): ImmutableBlockPlaceAmountData {
+        println("呼び出し。")
+        return ImmutableBlockPlaceAmountData(amount).also { println("返り値[$it]") }
+    }
+
+    override fun getValueGetter(): Value<*> {
+        println("呼び出し。")
+        return Sponge.getRegistry().valueFactory.createValue(KeyRepository.placeAmount, amount).also { println("返り値[$it]") }
+    }
+
+    override fun toContainer(): DataContainer {
+        println("呼び出し。")
+        return super.toContainer().set(KeyRepository.placeAmount, amount).also { println("返り値[$it]") }
+    }
+
+    override fun toString(): String = "amount = ${this.amount}"
 }

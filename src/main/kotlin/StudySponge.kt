@@ -2,6 +2,7 @@ import com.google.inject.Inject
 import command.AbstractCommand
 import command.commands.FlagTestCommand
 import command.commands.TestCommand
+import config.GameConfigManager
 import data.BlockPlaceAmountData
 import data.BlockPlaceAmountDataBuilder
 import data.ImmutableBlockPlaceAmountData
@@ -21,7 +22,6 @@ import org.spongepowered.api.event.cause.EventContextKeys
 import org.spongepowered.api.event.game.state.*
 import org.spongepowered.api.plugin.Plugin
 import org.spongepowered.api.plugin.PluginContainer
-import org.spongepowered.api.text.Text
 import re.tutorial.ImmutableMappedData
 import re.tutorial.MappedData
 import re.tutorial.MappedDataBuilder
@@ -86,6 +86,8 @@ class StudySponge {
             logger.info("Show the stacktrace below.")
             e.stackTrace
         }
+
+        val conf = GameConfigManager.setUp()
     }
 
     @Listener
@@ -144,7 +146,9 @@ class StudySponge {
                 .filter { it.isValid }
                 .size
 
-        causePlayer.getOrCreate(MappedData::class.java).get().map.put(placedBlockType.block.get(), placeAmount)
+        val data = causePlayer.getOrCreate(MappedData::class.java).get()
+        data.map[placedBlockType.block.get()] = placeAmount
+        causePlayer.offer(data)
 
         logger.info("ブロックタイプ[$placedBlockType],量[${causePlayer.getOrCreate(MappedData::class.java).get().get(placedBlockType.block.get())}]")
     }
