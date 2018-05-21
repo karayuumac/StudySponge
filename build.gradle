@@ -2,7 +2,7 @@ group 'com.github.karayuumac'
 version '1.0.0'
 
 buildscript {
-    ext.kotlin_version = '1.2.21'
+    ext.kotlin_version = '1.2.41'
 
     repositories {
         mavenCentral()
@@ -24,11 +24,16 @@ repositories {
         name = 'sponge'
         url = 'https://repo.spongepowered.org/maven'
     }
+    maven {
+        name = 'exposed-repo'
+        url('https://dl.bintray.com/kotlin/exposed/')
+    }
 }
 
 dependencies {
     compile "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
     compile 'org.spongepowered:spongeapi:7.1.0-20180303.082503-15'
+    embed 'org.jetbrains.exposed:exposed:0.8.5'
 }
 
 compileKotlin {
